@@ -15,8 +15,8 @@ API_KEY = os.getenv("GOOGLE_API_KEY")
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "clave_temporal_dev")
 
-DATABASE = "biblioteca.db"
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "biblioteca.db")
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
