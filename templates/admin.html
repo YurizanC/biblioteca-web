@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="contenedor">
+        <div class="encabezado">
+            <h1>👑 Panel Admin</h1>
+
+            <div class="usuario-info">
+                <span>
+                    Hola, {{ session.get("usuario_nombre") }}
+                    {% if session.get("usuario_rol") == "admin" %}
+                        (Admin)
+                    {% endif %}
+                </span>
+                <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+            </div>
+
+            <button id="toggle-tema" class="switch-tema" aria-label="Cambiar tema">
+                <span class="icono-sol">☀️</span>
+                <span class="interruptor">
+                    <span class="bolita"></span>
+                </span>
+                <span class="icono-luna">🌙</span>
+            </button>
+        </div>
+
+        <nav class="tabs">
+            <a href="{{ url_for('inicio') }}">Volver a biblioteca</a>
+        </nav>
+
+        {% with mensajes = get_flashed_messages() %}
+            {% if mensajes %}
+                {% for mensaje in mensajes %}
+                    <p class="mensaje-error">{{ mensaje }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="lista-libros">
+            <h2>Usuarios</h2>
+
+            {% if usuarios %}
+                <div class="admin-grid">
+                    {% for usuario in usuarios %}
+                        <article class="admin-card">
+                            <h3>
+                                <a href="{{ url_for('admin_ver_usuario', id_usuario=usuario.id) }}">
+                                    {{ usuario.nombre }}
+                                </a>
+                            </h3>
+                            <p><strong>Correo:</strong> {{ usuario.email }}</p>
+                            <p><strong>Rol:</strong> {{ usuario.rol }}</p>
+
+                            {% if usuario.id != session.get("usuario_id") %}
+                                <form action="{{ url_for('admin_eliminar_usuario', id_usuario=usuario.id) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar este usuario? También se borrarán sus libros.');">
+                                    <button type="submit" class="btn-eliminar">Eliminar usuario</button>
+                                </form>
+                            {% else %}
+                                <p><strong>Este eres tú</strong></p>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No hay usuarios.</p>
+            {% endif %}
+        </section>
+
+        <section class="lista-libros">
+            <h2>Libros de todos los usuarios</h2>
+
+            {% if libros %}
+                <div class="admin-grid">
+                    {% for libro in libros %}
+                        <article class="admin-card">
+                            <h3>{{ libro.titulo }}</h3>
+                            <p><strong>Autor:</strong> {{ libro.autor }}</p>
+                            <p><strong>Año:</strong> {{ libro.anio }}</p>
+                            <p><strong>Estado:</strong> {{ libro.estado }}</p>
+                            <p><strong>Usuario:</strong> {{ libro.usuario_nombre }}</p>
+
+                            <form action="{{ url_for('admin_eliminar_libro', id_libro=libro.id) }}" method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar este libro?');">
+                                <button type="submit" class="btn-eliminar">Eliminar libro</button>
+                            </form>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No hay libros guardados.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

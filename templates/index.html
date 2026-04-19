@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Biblioteca</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="contenedor">
+        <div class="encabezado">
+            <div class="encabezado-izquierda">
+                <h1>📚 Mi Biblioteca</h1>
+            </div>
+
+            <div class="encabezado-derecha">
+                <div class="usuario-info">
+                    <span>
+                        Hola, {{ session.get("usuario_nombre") }}
+                        {% if session.get("usuario_rol") == "admin" %}
+                            (Admin)
+                        {% endif %}
+                    </span>
+
+                    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+
+                    {% if session.get("usuario_rol") == "admin" %}
+                        <a href="{{ url_for('panel_admin') }}">Panel admin</a>
+                    {% endif %}
+
+                </div>
+
+                <button id="toggle-tema" class="switch-tema" aria-label="Cambiar tema">
+                    <span class="icono-sol">☀️</span>
+                    <span class="interruptor">
+                        <span class="bolita"></span>
+                    </span>
+                    <span class="icono-luna">🌙</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="tabs">
+            <a href="/?estado=leidos" class="{% if estado_actual == 'leidos' %}activo{% endif %}">Leídos</a>
+            <a href="/?estado=pendientes" class="{% if estado_actual == 'pendientes' %}activo{% endif %}">Pendientes</a>
+            <a href="/?estado=en_proceso" class="{% if estado_actual == 'en_proceso' %}activo{% endif %}">En proceso</a>
+            <a href="/?estado=quiero_leer" class="{% if estado_actual == 'quiero_leer' %}activo{% endif %}">Quiero leer</a>
+            <a href="/agregar">Agregar libro</a>
+
+            {% if session.get("usuario_rol") == "admin" %}
+                <a href="{{ url_for('panel_admin') }}">Panel admin</a>
+            {% endif %}
+        </nav>
+
+        <section class="lista-libros">
+            <h2>
+                {% if estado_actual == 'leidos' %}Libros leídos{% endif %}
+                {% if estado_actual == 'pendientes' %}Libros pendientes{% endif %}
+                {% if estado_actual == 'en_proceso' %}Libros en proceso{% endif %}
+                {% if estado_actual == 'quiero_leer' %}Libros que quiero leer{% endif %}
+            </h2>
+
+            {% if libros %}
+                <div class="grid-libros">
+                    {% for libro in libros %}
+                        <article class="card-libro">
+                            <img src="{{ libro.imagen }}" alt="Portada de {{ libro.titulo }}">
+                            <h3>{{ libro.titulo }}</h3>
+                            <p><strong>Autor:</strong> {{ libro.autor }}</p>
+                            <p><strong>Año:</strong> {{ libro.anio }}</p>
+
+                            {% if libro.favorito == 1 %}
+                                <p>⭐ Favorito</p>
+                            {% endif %}
+
+                            {% if libro.rating and libro.rating > 0 %}
+                                <p><strong>Calificación:</strong> {{ libro.rating }}/5</p>
+                            {% endif %}
+
+                            {% if libro.nota %}
+                                <p><strong>Nota:</strong> {{ libro.nota }}</p>
+                            {% endif %}
+
+                            <div class="acciones-libro">
+                                <a class="btn-editar" href="{{ url_for('vista_editar', id_libro=libro.id) }}">Editar</a>
+
+                                <form action="{{ url_for('eliminar_libro', id_libro=libro.id) }}" method="POST">
+                                    <button type="submit" class="btn-eliminar">Eliminar</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No hay libros en esta categoría todavía.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+
+</body>
+</html>

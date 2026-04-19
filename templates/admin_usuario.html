@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de usuario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="contenedor">
+        <div class="encabezado">
+            <div class="encabezado-izquierda">
+                <h1>👤 Detalle de usuario</h1>
+            </div>
+
+            <div class="encabezado-derecha">
+                <div class="usuario-info">
+                    <span>
+                        Hola, {{ session.get("usuario_nombre") }}
+                        {% if session.get("usuario_rol") == "admin" %}
+                            (Admin)
+                        {% endif %}
+                    </span>
+
+                    <a href="{{ url_for('panel_admin') }}">Panel admin</a>
+                    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+                </div>
+
+                <button id="toggle-tema" class="switch-tema" aria-label="Cambiar tema">
+                    <span class="icono-sol">☀️</span>
+                    <span class="interruptor">
+                        <span class="bolita"></span>
+                    </span>
+                    <span class="icono-luna">🌙</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="tabs">
+            <a href="{{ url_for('panel_admin') }}">Volver al panel admin</a>
+        </nav>
+
+        <section class="lista-libros">
+            <h2>Información del usuario</h2>
+            <div class="admin-card">
+                <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+                <p><strong>Correo:</strong> {{ usuario.email }}</p>
+                <p><strong>Rol:</strong> {{ usuario.rol }}</p>
+            </div>
+        </section>
+
+        <section class="lista-libros">
+            <h2>Resumen de biblioteca</h2>
+
+            {% if resumen %}
+                <div class="admin-grid">
+                    {% for item in resumen %}
+                        <article class="admin-card">
+                            <h3>{{ item.estado|replace('_', ' ')|title }}</h3>
+                            <p><strong>Total:</strong> {{ item.total }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Este usuario todavía no tiene libros.</p>
+            {% endif %}
+        </section>
+
+        <section class="lista-libros">
+            <h2>Libros del usuario</h2>
+
+            {% if libros %}
+                <div class="admin-grid">
+                    {% for libro in libros %}
+                        <article class="admin-card">
+                            <h3>{{ libro.titulo }}</h3>
+                            <p><strong>Autor:</strong> {{ libro.autor }}</p>
+                            <p><strong>Año:</strong> {{ libro.anio }}</p>
+                            <p><strong>Estado:</strong> {{ libro.estado }}</p>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Este usuario no tiene libros registrados.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+</body>
+</html>

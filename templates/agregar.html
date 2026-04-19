@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar libro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="contenedor">
+        <div class="encabezado">
+            <div class="encabezado-izquierda">
+                <h1>➕ Agregar libro</h1>
+            </div>
+
+            <div class="encabezado-derecha">
+                <div class="usuario-info">
+                    <span>
+                        Hola, {{ session.get("usuario_nombre") }}
+                        {% if session.get("usuario_rol") == "admin" %}
+                            (Admin)
+                        {% endif %}
+                    </span>
+
+                    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+
+                    {% if session.get("usuario_rol") == "admin" %}
+                        <a href="{{ url_for('panel_admin') }}">Panel admin</a>
+                    {% endif %}
+                </div>
+
+                <button id="toggle-tema" class="switch-tema" aria-label="Cambiar tema">
+                    <span class="icono-sol">☀️</span>
+                    <span class="interruptor">
+                        <span class="bolita"></span>
+                    </span>
+                    <span class="icono-luna">🌙</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="tabs">
+            <a href="/?estado=leidos">Leídos</a>
+            <a href="/?estado=pendientes">Pendientes</a>
+            <a href="/?estado=en_proceso">En proceso</a>
+            <a href="/?estado=quiero_leer">Quiero leer</a>
+            <a href="/agregar" class="activo">Agregar libro</a>
+
+            {% if session.get("usuario_rol") == "admin" %}
+                <a href="{{ url_for('panel_admin') }}">Panel admin</a>
+            {% endif %}
+        </nav>
+
+        <section class="formulario-grande">
+            <h2>Buscar datos del libro</h2>
+            <form action="/buscar-libro" method="POST">
+                <label for="titulo_busqueda">Nombre del libro o autor</label>
+                <input type="text" id="titulo_busqueda" name="titulo_busqueda" value="{{ titulo_busqueda or '' }}" placeholder="Ej: El principito o Antoine de Saint-Exupéry" required>
+                <button type="submit">Buscar datos</button>
+            </form>
+
+            {% if mensaje %}
+                <p class="mensaje-error">{{ mensaje }}</p>
+            {% endif %}
+        </section>
+
+        {% if resultados %}
+        <section class="lista-libros">
+            <h2>Elige una edición</h2>
+
+            <div class="grid-libros">
+                {% for libro in resultados %}
+                    <article class="card-libro">
+                        {% if libro.imagen %}
+                            <img src="{{ libro.imagen }}" alt="Portada de {{ libro.titulo }}">
+                        {% else %}
+                            <div class="sin-portada">Sin portada</div>
+                        {% endif %}
+
+                        <h3>{{ libro.titulo }}</h3>
+                        <p><strong>Autor:</strong> {{ libro.autor or 'No disponible' }}</p>
+                        <p><strong>Año:</strong> {{ libro.anio or 'No disponible' }}</p>
+                        <p><strong>Idioma:</strong> {{ libro.idioma or 'No disponible' }}</p>
+
+                        <form action="/usar-edicion" method="POST">
+                            <input type="hidden" name="titulo" value="{{ libro.titulo }}">
+                            <input type="hidden" name="autor" value="{{ libro.autor }}">
+                            <input type="hidden" name="anio" value="{{ libro.anio }}">
+                            <input type="hidden" name="imagen" value="{{ libro.imagen }}">
+                            <button type="submit" class="btn-editar">Usar esta edición</button>
+                        </form>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="formulario-grande">
+            <h2>Datos del libro</h2>
+            <form action="/guardar" method="POST">
+                <label for="titulo">Título</label>
+                <input type="text" id="titulo" name="titulo" value="{{ datos.titulo if datos else '' }}" required>
+
+                <label for="autor">Autor</label>
+                <input type="text" id="autor" name="autor" value="{{ datos.autor if datos else '' }}" required>
+
+                <label for="anio">Año de publicación</label>
+                <input type="number" id="anio" name="anio" value="{{ datos.anio if datos else '' }}" required>
+
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado" required>
+                    <option value="leidos">Leídos</option>
+                    <option value="pendientes">Pendientes</option>
+                    <option value="en_proceso">En proceso</option>
+                    <option value="quiero_leer">Quiero leer</option>
+                </select>
+
+                <label for="imagen">URL de la portada</label>
+                <input type="text" id="imagen" name="imagen" value="{{ datos.imagen if datos else '' }}">
+                <small>Puedes cambiar la portada manualmente si la búsqueda trae una imagen incorrecta.</small>
+
+                <label for="favorito">
+                    <input type="checkbox" id="favorito" name="favorito">
+                    Marcar como favorito
+                </label>
+
+                <label for="rating">Calificación</label>
+                <select id="rating" name="rating">
+                    <option value="0">Sin calificación</option>
+                    <option value="1">1 estrella</option>
+                    <option value="2">2 estrellas</option>
+                    <option value="3">3 estrellas</option>
+                    <option value="4">4 estrellas</option>
+                    <option value="5">5 estrellas</option>
+                </select>
+
+                <label for="nota">Nota personal</label>
+                <textarea id="nota" name="nota" rows="4" placeholder="Escribe una nota sobre este libro..."></textarea>
+
+                <button type="submit">Guardar libro</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+
+</body>
+</html>

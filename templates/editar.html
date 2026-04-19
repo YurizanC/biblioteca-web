@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar libro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="contenedor">
+        <div class="encabezado">
+            <div class="encabezado-izquierda">
+                <h1>✏️ Editar libro</h1>
+            </div>
+
+            <div class="encabezado-derecha">
+                <div class="usuario-info">
+                    <span>
+                        Hola, {{ session.get("usuario_nombre") }}
+                        {% if session.get("usuario_rol") == "admin" %}
+                            (Admin)
+                        {% endif %}
+                    </span>
+
+                    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+
+                    {% if session.get("usuario_rol") == "admin" %}
+                        <a href="{{ url_for('panel_admin') }}">Panel admin</a>
+                    {% endif %}
+
+
+                </div>
+
+                <button id="toggle-tema" class="switch-tema" aria-label="Cambiar tema">
+                    <span class="icono-sol">☀️</span>
+                    <span class="interruptor">
+                        <span class="bolita"></span>
+                    </span>
+                    <span class="icono-luna">🌙</span>
+                </button>
+            </div>
+        </div>
+
+        <nav class="tabs">
+            <a href="/?estado=leidos">Leídos</a>
+            <a href="/?estado=pendientes">Pendientes</a>
+            <a href="/?estado=en_proceso">En proceso</a>
+            <a href="/?estado=quiero_leer">Quiero leer</a>
+            <a href="/agregar">Agregar libro</a>
+
+            {% if session.get("usuario_rol") == "admin" %}
+                <a href="{{ url_for('panel_admin') }}">Panel admin</a>
+            {% endif %}
+        </nav>
+
+        <section class="formulario-grande">
+            <form action="{{ url_for('actualizar_libro', id_libro=libro.id) }}" method="POST">
+                <label for="titulo">Título</label>
+                <input type="text" id="titulo" name="titulo" value="{{ libro.titulo }}" required>
+
+                <label for="autor">Autor</label>
+                <input type="text" id="autor" name="autor" value="{{ libro.autor }}" required>
+
+                <label for="anio">Año de publicación</label>
+                <input type="number" id="anio" name="anio" value="{{ libro.anio }}" required>
+
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado" required>
+                    <option value="leidos" {% if libro.estado == 'leidos' %}selected{% endif %}>Leídos</option>
+                    <option value="pendientes" {% if libro.estado == 'pendientes' %}selected{% endif %}>Pendientes</option>
+                    <option value="en_proceso" {% if libro.estado == 'en_proceso' %}selected{% endif %}>En proceso</option>
+                    <option value="quiero_leer" {% if libro.estado == 'quiero_leer' %}selected{% endif %}>Quiero leer</option>
+                </select>
+
+                <label for="imagen">URL de la portada</label>
+                <input type="text" id="imagen" name="imagen" value="{{ libro.imagen }}">
+
+                <label for="favorito">
+                    <input type="checkbox" id="favorito" name="favorito" {% if libro.favorito == 1 %}checked{% endif %}>
+                    Marcar como favorito
+                </label>
+
+                <label for="rating">Calificación</label>
+                <select id="rating" name="rating">
+                    <option value="0" {% if libro.rating == 0 %}selected{% endif %}>Sin calificación</option>
+                    <option value="1" {% if libro.rating == 1 %}selected{% endif %}>1 estrella</option>
+                    <option value="2" {% if libro.rating == 2 %}selected{% endif %}>2 estrellas</option>
+                    <option value="3" {% if libro.rating == 3 %}selected{% endif %}>3 estrellas</option>
+                    <option value="4" {% if libro.rating == 4 %}selected{% endif %}>4 estrellas</option>
+                    <option value="5" {% if libro.rating == 5 %}selected{% endif %}>5 estrellas</option>
+                </select>
+
+                <label for="nota">Nota personal</label>
+                <textarea id="nota" name="nota" rows="4">{{ libro.nota or '' }}</textarea>
+
+                <button type="submit">Guardar cambios</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+
+</body>
+</html>
